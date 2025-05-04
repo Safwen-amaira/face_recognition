@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register User</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .video-feed {
+            width: 640px;
+            height: 480px;
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+        .status-text {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Register New User</h1>
+    <div class="container">
+        <form method="POST" action="/register">
+            <input type="text" name="username" placeholder="Enter your name" required>
+            <button type="submit" class="btn">Start Registration</button>
+        </form>
+
+        <img id="videoFeed" src="{{ url_for('video_feed') }}" class="video-feed">
+        <p id="statusText" class="status-text"></p>
+        <a href="/" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+        window.onload = function () {
+            const video = document.getElementById("videoFeed");
+            const statusText = document.getElementById("statusText");
+            const urlParams = new URLSearchParams(window.location.search);
+            const formSubmitted = urlParams.get("started") === "true";
+            if (formSubmitted) {
+                video.style.display = "block";
+                statusText.textContent = "⏳ Registering... Please look at the camera.";
+
+                const interval = setInterval(() => {
+                    fetch("/registration_status")
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === "complete") {
+                                statusText.textContent = "✅ Registration Complete!";
+                                clearInterval(interval);
+                            } else {
+                                statusText.textContent = "⏳ Registering... Please hold still.";
+                            }
+                        });
+                }, 1000);
+            }
+        };
+    </script>
+</body>
+</html>
